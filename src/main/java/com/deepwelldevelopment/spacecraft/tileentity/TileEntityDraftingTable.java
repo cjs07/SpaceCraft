@@ -19,6 +19,9 @@ public class TileEntityDraftingTable extends TileEntity implements ITickable {
 
     ItemStack[] itemsInSlots = new ItemStack[3];
 
+    int stacksRequired = 10;
+    ItemResearchDraft activeDraft = null;
+
     private ItemStackHandler itemStackHandler = new ItemStackHandler(SIZE) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -90,26 +93,62 @@ public class TileEntityDraftingTable extends TileEntity implements ITickable {
                 itemsInSlots[i] = itemStackHandler.getStackInSlot(i);
             }
 
-            ItemResearchDraft draft = ResearchRecipes.instance().getMk1DraftFromInputs(itemsInSlots);
-            if (draft != null) {
-                for (int i = 0; i < itemStackHandler.getSlots() - 1; i++) {
-                    if (itemStackHandler.getStackInSlot(i) != null) {
-                        itemStackHandler.getStackInSlot(i).stackSize--;
+            if (itemStackHandler.getStackInSlot(SIZE - 1) == null) {
+                ItemResearchDraft draft = ResearchRecipes.instance().getMk1DraftFromInputs(itemsInSlots);
+                if (draft != null) {
+                    if (activeDraft != null) {
+                        if (ItemStack.areItemsEqual(new ItemStack(draft), new ItemStack(activeDraft))) {
+                            for (int i = 0; i < itemStackHandler.getSlots() - 1; i++) {
+                                if (itemStackHandler.getStackInSlot(i) != null) {
+                                    itemStackHandler.getStackInSlot(i).stackSize--;
+                                }
+                            }
+                            stacksRequired--;
+                        }
+                    } else {
+                        for (int i = 0; i < itemStackHandler.getSlots() - 1; i++) {
+                            if (itemStackHandler.getStackInSlot(i) != null) {
+                                itemStackHandler.getStackInSlot(i).stackSize--;
+                            }
+                            activeDraft = draft;
+                        }
+                        stacksRequired--;
                     }
-                    itemStackHandler.setStackInSlot(SIZE - 1, new ItemStack(draft));
+                    if (stacksRequired <= 0) {
+                        itemStackHandler.setStackInSlot(SIZE - 1, new ItemStack(draft));
+                        activeDraft = null;
+                        stacksRequired = 10;
+                    }
                 }
-            }
-            //remove any item stacks with no items remaining
-            for (int i = 0; i < itemStackHandler.getSlots() - 1; i++) {
-                ItemStack stack = itemStackHandler.getStackInSlot(i);
-                if (stack != null) {
-                    if (stack.stackSize <= 0) {
-                        itemStackHandler.setStackInSlot(i, null);
-                        itemsInSlots[i] = null;
+                //remove any item stacks with no items remaining
+                for (int i = 0; i < itemStackHandler.getSlots() - 1; i++) {
+                    ItemStack stack = itemStackHandler.getStackInSlot(i);
+                    if (stack != null) {
+                        if (stack.stackSize <= 0) {
+                            itemStackHandler.setStackInSlot(i, null);
+                            itemsInSlots[i] = null;
+                        }
                     }
                 }
             }
         }
         markDirty();
+    }
+
+    public int getField(int id) {
+        switch (id) {
+            case 0:
+                return stacksRequired;
+            default:
+                return 0;
+        }
+    }
+
+    public void setField(int id, int value) {
+        switch (id) {
+            case 0:
+                stacksRequired = value;
+                break;
+        }
     }
 }

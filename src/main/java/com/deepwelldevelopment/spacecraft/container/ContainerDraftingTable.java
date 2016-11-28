@@ -4,9 +4,12 @@ import com.deepwelldevelopment.spacecraft.container.gui.slot.SlotDraftingTableOu
 import com.deepwelldevelopment.spacecraft.tileentity.TileEntityDraftingTable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -16,6 +19,7 @@ import javax.annotation.Nullable;
 public class ContainerDraftingTable extends Container {
 
     private TileEntityDraftingTable te;
+    private int stacksRequired;
 
     public ContainerDraftingTable(IInventory playerInventory, TileEntityDraftingTable te) {
         this.te = te;
@@ -53,6 +57,25 @@ public class ContainerDraftingTable extends Container {
             y = 58 + 70;
             this.addSlotToContainer(new Slot(playerInventory, row, x, y));
         }
+    }
+
+    public void detectAndSendChanges() {
+        super.detectAndSendChanges();
+
+        for (int i = 0; i < this.listeners.size(); i++) {
+            IContainerListener icontainerlistener = this.listeners.get(i);
+
+            if (this.stacksRequired != this.te.getField(0)) {
+                icontainerlistener.sendProgressBarUpdate(this, 0, this.te.getField(0));
+            }
+        }
+        this.stacksRequired = this.te.getField(0);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void updateProgressBar(int id, int data)
+    {
+        this.te.setField(id, data);
     }
 
     //shift click implementation

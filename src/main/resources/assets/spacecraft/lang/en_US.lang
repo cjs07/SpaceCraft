@@ -1,0 +1,24 @@
+#Items
+item.ingotCopper.name=Copper Ingot
+item.ingotTin.name=Tin Ingot
+item.ingotAluminum.name=Aluminum Ingot
+item.ingotLead.name=Lead Ingot
+item.ingotSilver.name=Silver Ingot
+item.ingotNickel.name=Nickel Ingot
+item.ingotPlatinum.name=Platinum Ingot
+item.ingotUranium.name=Uranium Ingot
+item.ingotIridium.name=Iridium Ingot
+
+#Blocks
+tile.oreCopper.name=Copper Ore
+tile.oreTin.name=Tin Ore
+tile.oreAluminum.name=Aluminum Ore
+tile.oreLead.name=Lead Ore
+tile.oreSilver.name=Silver Ore
+tile.oreNickel.name=Nickel Ore
+tile.orePlatinum.name=Platinum Ore
+tile.oreUranium.name=Uranium Ore
+tile.oreIridium.name=Iridium Ore
+
+#Creative Tab
+itemGroup.spacecraft=SpaceCraft

@@ -55,17 +55,12 @@ public class ResearchRecipes {
 
     public ItemResearchDraft getMk1DraftFromInputs(ItemStack[] inputs) {
         for (Map.Entry <ItemStack[], ItemResearchDraft> entry : this. mk1Drafts.entrySet()) {
-            for (ItemStack stack : inputs) {
-                for (int i = 0; i < entry.getKey().length; i++) {
-                    ItemStack checkStack = entry.getKey()[i];
-                    if (stack != null && checkStack != null) {
-                        if (!ItemStack.areItemsEqual(stack, checkStack)) {
-                            break; //items are not equal, leave inner for loop
-                        }
-                    }
-                    if (i == (entry.getKey().length - 1)) { //every slot has been checked
-                        return entry.getValue();
-                    }
+            for (int i = 0; i < inputs.length; i++) {
+                if (!ItemStack.areItemsEqual(inputs[i], entry.getKey()[i])) {
+                    break;
+                }
+                if (i == (entry.getKey().length - 1)) { //every slot has been checked
+                    return entry.getValue();
                 }
             }
         }
