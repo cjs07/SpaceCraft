@@ -1,5 +1,10 @@
 package com.deepwelldevelopment.spacecraft.manager;
 
+import com.deepwelldevelopment.spacecraft.item.SpaceCraftItems;
+import com.deepwelldevelopment.spacecraft.item.research.discovery.ItemDiscovery;
+import com.deepwelldevelopment.spacecraft.recipe.crafting.ResearchCraftingRecipe;
+import com.deepwelldevelopment.spacecraft.recipe.crafting.ResearchRecipeShaped;
+import com.deepwelldevelopment.spacecraft.recipe.crafting.ResearchRecipeShapeless;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.*;
@@ -11,25 +16,23 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class ResearchCraftingManager {
 
     private static final ResearchCraftingManager INSTANCE = new ResearchCraftingManager();
-    private final List<IRecipe> recipes = Lists.<IRecipe>newArrayList();
+    private final Map<IRecipe, ItemDiscovery> recipes = Maps.newHashMap();
 
     public static ResearchCraftingManager getInstance() {
         return INSTANCE;
     }
 
-    private ResearchCraftingManager() {
+    public void doRecipes() {
         this.addRecipe(new ItemStack(Items.PAPER, 3), new Object[]{"###", '#', Items.REEDS});
         this.addShapelessRecipe(new ItemStack(Items.BOOK, 1), new Object[]{Items.PAPER, Items.PAPER, Items.PAPER, Items.LEATHER});
         this.addShapelessRecipe(new ItemStack(Items.WRITABLE_BOOK, 1), new Object[]{Items.BOOK, new ItemStack(Items.DYE, 1, EnumDyeColor.BLACK.getDyeDamage()), Items.FEATHER});
@@ -172,14 +175,20 @@ public class ResearchCraftingManager {
         this.addRecipe(new ItemStack(Items.ARMOR_STAND, 1), new Object[]{"///", " / ", "/_/", '/', Items.STICK, '_', new ItemStack(Blocks.STONE_SLAB, 1, BlockStoneSlab.EnumType.STONE.getMetadata())});
         this.addRecipe(new ItemStack(Blocks.END_ROD, 4), new Object[]{"/", "#", '/', Items.BLAZE_ROD, '#', Items.CHORUS_FRUIT_POPPED});
         this.addRecipe(new ItemStack(Blocks.field_189880_di, 1), new Object[]{"XXX", "XXX", "XXX", 'X', new ItemStack(Items.DYE, 1, EnumDyeColor.WHITE.getDyeDamage())});
-        Collections.sort(this.recipes, new Comparator<IRecipe>() {
-            public int compare(IRecipe p_compare_1_, IRecipe p_compare_2_) {
-                return p_compare_1_ instanceof ShapelessRecipes && p_compare_2_ instanceof ShapedRecipes ? 1 : (p_compare_2_ instanceof ShapelessRecipes && p_compare_1_ instanceof ShapedRecipes ? -1 : (p_compare_2_.getRecipeSize() < p_compare_1_.getRecipeSize() ? -1 : (p_compare_2_.getRecipeSize() > p_compare_1_.getRecipeSize() ? 1 : 0)));
-            }
-        });
+    }
+
+    private ResearchCraftingManager() {
     }
 
     public ShapedRecipes addRecipe(ItemStack stack, Object... recipeComponents) {
+        return this.addRecipe(stack, SpaceCraftItems.discoveryTools, recipeComponents);
+    }
+
+    public void addShapelessRecipe(ItemStack stack, Object... recipeComponents) {
+        this.addShapelessRecipe(stack, SpaceCraftItems.discoveryTools, recipeComponents);
+    }
+
+    public ShapedRecipes addRecipe(ItemStack stack, ItemDiscovery requiredResearch, Object... recipeComponents) {
         String s = "";
         int i = 0;
         int j = 0;
@@ -229,12 +238,13 @@ public class ResearchCraftingManager {
                 aitemstack[l] = null;
             }
         }
-        ShapedRecipes shapedrecipes = new ShapedRecipes(j, k, aitemstack, stack);
-        this.recipes.add(shapedrecipes);
+        ResearchRecipeShaped shapedrecipes = new ResearchRecipeShaped(j, k, aitemstack, stack, requiredResearch);
+        GameRegistry.addRecipe(shapedrecipes);
+        this.recipes.put(shapedrecipes, requiredResearch);
         return shapedrecipes;
     }
 
-    public void addShapelessRecipe(ItemStack stack, Object... recipeComponents) {
+    public void addShapelessRecipe(ItemStack stack, ItemDiscovery requiredResearch, Object... recipeComponents) {
         List<ItemStack> list = Lists.<ItemStack>newArrayList();
 
         for (Object object : recipeComponents) {
@@ -250,17 +260,21 @@ public class ResearchCraftingManager {
                 list.add(new ItemStack((Block)object));
             }
         }
-        this.recipes.add(new ShapelessRecipes(stack, list));
+        ResearchRecipeShapeless recipe = new ResearchRecipeShapeless(stack, list, requiredResearch);
+        GameRegistry.addRecipe(recipe);
+        this.recipes.put(recipe, requiredResearch);
     }
 
-    public void addRecipe(IRecipe recipe)
-    {
-        this.recipes.add(recipe);
+    public void addRecipe(IRecipe recipe) {
+        if (recipe instanceof ResearchCraftingRecipe) {
+            recipes.put(recipe, ((ResearchCraftingRecipe) recipe).getRequiredResearch());
+        }
     }
 
     @Nullable
     public ItemStack findMatchingRecipe(InventoryCrafting craftMatrix, World worldIn) {
-        for (IRecipe irecipe : this.recipes) {
+        for (Map.Entry<IRecipe, ItemDiscovery> entry : recipes.entrySet()) {
+            IRecipe irecipe = entry.getKey();
             if (irecipe.matches(craftMatrix, worldIn)) {
                 return irecipe.getCraftingResult(craftMatrix);
             }
@@ -269,7 +283,8 @@ public class ResearchCraftingManager {
     }
 
     public ItemStack[] getRemainingItems(InventoryCrafting craftMatrix, World worldIn) {
-        for (IRecipe irecipe : this.recipes) {
+        for (Map.Entry<IRecipe, ItemDiscovery> entry : recipes.entrySet()) {
+            IRecipe irecipe = entry.getKey();
             if (irecipe.matches(craftMatrix, worldIn)) {
                 return irecipe.getRemainingItems(craftMatrix);
             }

@@ -1,5 +1,6 @@
 package com.deepwelldevelopment.spacecraft.item;
 
+import com.deepwelldevelopment.spacecraft.item.research.discovery.DiscoveryTools;
 import com.deepwelldevelopment.spacecraft.item.research.draft.ItemResearchDraft;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -19,6 +20,9 @@ public class SpaceCraftItems {
     //research drafts
     public static ItemResearchDraft draftTools;
 
+    //discoveries
+    public static DiscoveryTools discoveryTools;
+
     public static void init() {
         ingotCopper = register(new ItemOre("ingotCopper", "ingotCopper"));
         ingotTin = register(new ItemOre("ingotTin", "ingotTin"));
@@ -30,6 +34,7 @@ public class SpaceCraftItems {
         ingotUranium = register(new ItemOre("ingotUranium", "ingotUranium"));
         ingotIridium = register(new ItemOre("ingotIridium", "ingotIridium"));
         draftTools = register(new ItemResearchDraft("draftTools"));
+        discoveryTools = register(new DiscoveryTools());
     }
 
     private static <T extends Item> T register(T item) {
