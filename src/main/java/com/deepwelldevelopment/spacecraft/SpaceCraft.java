@@ -2,12 +2,14 @@ package com.deepwelldevelopment.spacecraft;
 
 import com.deepwelldevelopment.spacecraft.block.SpaceCraftBlocks;
 import com.deepwelldevelopment.spacecraft.client.SpaceCraftTab;
+import com.deepwelldevelopment.spacecraft.event.SpaceCraftEventHandler;
 import com.deepwelldevelopment.spacecraft.handler.GuiHandler;
 import com.deepwelldevelopment.spacecraft.item.SpaceCraftItems;
 import com.deepwelldevelopment.spacecraft.proxy.CommonProxy;
 import com.deepwelldevelopment.spacecraft.recipe.SpaceCraftCraftingRecipes;
 import com.deepwelldevelopment.spacecraft.recipe.SpaceCraftSmeltingRecipes;
 import com.deepwelldevelopment.spacecraft.world.SpaceCraftWorldGen;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -44,6 +46,7 @@ public class SpaceCraft {
         SpaceCraftCraftingRecipes.init();
         SpaceCraftSmeltingRecipes.init();
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new GuiHandler());
+        MinecraftForge.EVENT_BUS.register(new SpaceCraftEventHandler());
     }
 
     @Mod.EventHandler
