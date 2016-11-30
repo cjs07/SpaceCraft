@@ -1,6 +1,5 @@
 package com.deepwelldevelopment.spacecraft.recipe.crafting;
 
-import com.deepwelldevelopment.spacecraft.item.research.capability.ResearchCapabilities;
 import com.deepwelldevelopment.spacecraft.item.research.discovery.ItemDiscovery;
 import com.google.common.base.Throwables;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,13 +24,9 @@ public class ResearchRecipeShaped extends ShapedRecipes implements ResearchCraft
     public boolean matches(InventoryCrafting inv, World worldIn) {
         EntityPlayer player = findPlayer(inv);
         if (player != null) {
-            if (player.capabilities instanceof ResearchCapabilities) {
-                if (((ResearchCapabilities) player.capabilities).hasResearch(requiredResearch)) {
-                    return true;
-                }
-            }
+            return false;
         }
-        return false;
+        return true;
     }
 
     @Override

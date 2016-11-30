@@ -1,6 +1,5 @@
 package com.deepwelldevelopment.spacecraft.recipe.crafting;
 
-import com.deepwelldevelopment.spacecraft.item.research.capability.ResearchCapabilities;
 import com.deepwelldevelopment.spacecraft.item.research.discovery.ItemDiscovery;
 import com.google.common.base.Throwables;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,14 +25,9 @@ public class ResearchRecipeShapeless extends ShapelessRecipes implements Researc
     public boolean matches(InventoryCrafting inv, World worldIn) {
         EntityPlayer player = findPlayer(inv);
         if (player != null) {
-            if (player.capabilities instanceof ResearchCapabilities) {
-                if (((ResearchCapabilities) player.capabilities).hasResearch(requiredResearch)) {
-                    System.out.println("[Crafting] Research found for the player. Crafting can be done");
-                    return super.matches(inv, worldIn);
-                }
-            }
+            return false;
         }
-        return false;
+        return true;
     }
 
     @Override
