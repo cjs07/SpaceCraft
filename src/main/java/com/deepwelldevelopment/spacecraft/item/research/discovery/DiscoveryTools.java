@@ -1,6 +1,5 @@
 package com.deepwelldevelopment.spacecraft.item.research.discovery;
 
-import com.deepwelldevelopment.spacecraft.item.research.capability.ResearchCapabilities;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -15,12 +14,6 @@ public class DiscoveryTools extends ItemDiscovery {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-        if (playerIn.capabilities instanceof ResearchCapabilities) {
-            ((ResearchCapabilities) playerIn.capabilities).addResearch(this);
-        } else {
-            playerIn.capabilities = new ResearchCapabilities();
-            ((ResearchCapabilities)playerIn.capabilities).addResearch(this);
-        }
         return super.onItemRightClick(itemStackIn, worldIn, playerIn, hand);
     }
 }

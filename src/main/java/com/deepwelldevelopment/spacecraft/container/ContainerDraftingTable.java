@@ -24,10 +24,6 @@ public class ContainerDraftingTable extends Container {
     public ContainerDraftingTable(IInventory playerInventory, TileEntityDraftingTable te) {
         this.te = te;
 
-        // This container references items out of our own inventory (the 9 slots we hold ourselves)
-        // as well as the slots from the player inventory so that the user can transfer items between
-        // both inventories. The two calls below make sure that slots are defined for both inventories.
-
         IItemHandler itemHandler = this.te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         int x = 40;
         int y = 8;

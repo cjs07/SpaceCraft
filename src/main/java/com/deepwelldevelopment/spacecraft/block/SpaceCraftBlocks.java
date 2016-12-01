@@ -19,6 +19,7 @@ public class SpaceCraftBlocks {
     public static BlockOre oreIridium;
 
     public static BlockDraftingTable draftingTable;
+    public static BlockCraftingTable2 craftingTable2;
 
     public static void init() {
         oreCopper = register(new BlockOre("oreCopper", "oreCopper"));
@@ -42,6 +43,7 @@ public class SpaceCraftBlocks {
         oreIridium.setHarvestLevel("pickaxe", Item.ToolMaterial.DIAMOND.getHarvestLevel());
 
         draftingTable = register(new BlockDraftingTable());
+        craftingTable2 = register(new BlockCraftingTable2());
     }
 
     private static <T extends Block> T register(T block, ItemBlock itemBlock) {

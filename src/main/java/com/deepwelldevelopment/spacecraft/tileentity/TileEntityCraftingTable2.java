@@ -10,14 +10,9 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class TileEntityCraftingTable2 extends TileEntity {
 
-    private ItemStackHandler inventoryItemStackHandler = new ItemStackHandler() {
-        @Override
-        protected void onContentsChanged(int slot) {
-            TileEntityCraftingTable2.this.markDirty();
-        }
-    };
+    public static final int SIZE = 24;
 
-    private ItemStackHandler craftingMatrixHandler = new ItemStackHandler() {
+    private ItemStackHandler inventoryItemStackHandler = new ItemStackHandler(SIZE) {
         @Override
         protected void onContentsChanged(int slot) {
             TileEntityCraftingTable2.this.markDirty();

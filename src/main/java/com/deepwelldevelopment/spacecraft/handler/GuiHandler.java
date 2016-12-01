@@ -1,7 +1,10 @@
 package com.deepwelldevelopment.spacecraft.handler;
 
+import com.deepwelldevelopment.spacecraft.container.ContainerCraftingTable2;
 import com.deepwelldevelopment.spacecraft.container.ContainerDraftingTable;
+import com.deepwelldevelopment.spacecraft.container.gui.GuiCraftingTable2;
 import com.deepwelldevelopment.spacecraft.container.gui.GuiDraftingTable;
+import com.deepwelldevelopment.spacecraft.tileentity.TileEntityCraftingTable2;
 import com.deepwelldevelopment.spacecraft.tileentity.TileEntityDraftingTable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -17,6 +20,8 @@ public class GuiHandler implements IGuiHandler {
         TileEntity te = world.getTileEntity(pos);
         if (te instanceof TileEntityDraftingTable) {
             return new ContainerDraftingTable(player.inventory, (TileEntityDraftingTable) te);
+        } else if (te instanceof TileEntityCraftingTable2) {
+            return new ContainerCraftingTable2(player.inventory, (TileEntityCraftingTable2) te);
         }
         return null;
     }
@@ -28,6 +33,9 @@ public class GuiHandler implements IGuiHandler {
         if (te instanceof TileEntityDraftingTable) {
             TileEntityDraftingTable containerTileEntity = (TileEntityDraftingTable) te;
             return new GuiDraftingTable(containerTileEntity, new ContainerDraftingTable(player.inventory, containerTileEntity));
+        } else if (te instanceof TileEntityCraftingTable2) {
+            TileEntityCraftingTable2 containerTileEntity = (TileEntityCraftingTable2) te;
+            return new GuiCraftingTable2(containerTileEntity, new ContainerCraftingTable2(player.inventory, containerTileEntity));
         }
         return null;
     }
