@@ -1,9 +1,9 @@
 package com.deepwelldevelopment.spacecraft.client;
 
-import com.deepwelldevelopment.spacecraft.common.container.ContainerCraftingTable2;
-import com.deepwelldevelopment.spacecraft.common.container.ContainerDraftingTable;
-import com.deepwelldevelopment.spacecraft.common.container.gui.GuiCraftingTable2;
-import com.deepwelldevelopment.spacecraft.common.container.gui.GuiDraftingTable;
+import com.deepwelldevelopment.spacecraft.client.container.ContainerCraftingTable2;
+import com.deepwelldevelopment.spacecraft.client.container.ContainerDraftingTable;
+import com.deepwelldevelopment.spacecraft.client.gui.GuiCraftingTable2;
+import com.deepwelldevelopment.spacecraft.client.gui.GuiDraftingTable;
 import com.deepwelldevelopment.spacecraft.common.tileentity.TileEntityCraftingTable2;
 import com.deepwelldevelopment.spacecraft.common.tileentity.TileEntityDraftingTable;
 import net.minecraft.entity.player.EntityPlayer;
