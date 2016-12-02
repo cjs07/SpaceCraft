@@ -1,7 +1,7 @@
 package com.deepwelldevelopment.spacecraft.client;
 
-import com.deepwelldevelopment.spacecraft.SpaceCraft;
-import com.deepwelldevelopment.spacecraft.item.SpaceCraftItems;
+import com.deepwelldevelopment.spacecraft.common.SpaceCraft;
+import com.deepwelldevelopment.spacecraft.common.item.SpaceCraftItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
