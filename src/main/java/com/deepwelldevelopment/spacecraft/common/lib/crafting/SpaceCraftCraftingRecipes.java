@@ -1,6 +1,5 @@
 package com.deepwelldevelopment.spacecraft.common.lib.crafting;
 
-import com.deepwelldevelopment.spacecraft.manager.ResearchCraftingManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
@@ -11,7 +10,7 @@ public class SpaceCraftCraftingRecipes {
     public static void init() {
         //remove all recipes
         CraftingManager.getInstance().getRecipeList().clear();
-        ResearchCraftingManager.getInstance().doRecipes();
+//        ResearchCraftingManager.getInstance().doRecipes();
 
         GameRegistry.addShapelessRecipe(new ItemStack(Blocks.PLANKS, 4), Blocks.LOG);
         GameRegistry.addShapelessRecipe(new ItemStack(Blocks.PLANKS, 4, 1), new ItemStack(Blocks.LOG, 1, 1));

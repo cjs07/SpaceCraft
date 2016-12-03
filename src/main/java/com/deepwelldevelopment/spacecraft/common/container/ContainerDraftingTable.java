@@ -1,6 +1,6 @@
 package com.deepwelldevelopment.spacecraft.common.container;
 
-import com.deepwelldevelopment.spacecraft.common.container.gui.slot.SlotDraftingTableOutput;
+import com.deepwelldevelopment.spacecraft.client.gui.slot.SlotDraftingTableOutput;
 import com.deepwelldevelopment.spacecraft.common.tileentity.TileEntityDraftingTable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;

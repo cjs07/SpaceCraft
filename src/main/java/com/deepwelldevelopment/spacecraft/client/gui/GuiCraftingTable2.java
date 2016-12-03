@@ -1,7 +1,7 @@
 package com.deepwelldevelopment.spacecraft.client.gui;
 
 import com.deepwelldevelopment.spacecraft.common.SpaceCraft;
-import com.deepwelldevelopment.spacecraft.client.container.ContainerCraftingTable2;
+import com.deepwelldevelopment.spacecraft.common.container.ContainerCraftingTable2;
 import com.deepwelldevelopment.spacecraft.common.tileentity.TileEntityCraftingTable2;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.util.ResourceLocation;

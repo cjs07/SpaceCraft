@@ -1,12 +1,12 @@
 package com.deepwelldevelopment.spacecraft.common;
 
-import com.deepwelldevelopment.spacecraft.common.block.SpaceCraftBlocks;
-import com.deepwelldevelopment.spacecraft.client.SpaceCraftTab;
-import com.deepwelldevelopment.spacecraft.common.lib.event.SpaceCraftEventHandler;
 import com.deepwelldevelopment.spacecraft.client.GuiHandler;
+import com.deepwelldevelopment.spacecraft.client.SpaceCraftTab;
+import com.deepwelldevelopment.spacecraft.common.block.SpaceCraftBlocks;
 import com.deepwelldevelopment.spacecraft.common.item.SpaceCraftItems;
 import com.deepwelldevelopment.spacecraft.common.lib.crafting.SpaceCraftCraftingRecipes;
 import com.deepwelldevelopment.spacecraft.common.lib.crafting.SpaceCraftSmeltingRecipes;
+import com.deepwelldevelopment.spacecraft.common.lib.event.SpaceCraftEventHandler;
 import com.deepwelldevelopment.spacecraft.common.lib.world.SpaceCraftWorldGen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
