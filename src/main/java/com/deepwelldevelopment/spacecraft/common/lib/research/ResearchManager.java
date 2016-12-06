@@ -95,7 +95,7 @@ public class ResearchManager {
             break;
         }
         if (main.size() == 0) {
-            ArrayList<String> remove = new ArrayList<>();
+            ArrayList<String> remove = new ArrayList<String>();
             for (HexUtils.Hex hex : note.hexes.values()) {
                 if (note.hexEntries.get(hex.toString()).type == 1 || remains.contains(hex.toString())) {
                     continue;
