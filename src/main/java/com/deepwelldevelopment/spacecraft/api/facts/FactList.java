@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 
 public class FactList implements Serializable {
-    public LinkedHashMap<Fact, Integer> facts = new LinkedHashMap<>();
+    public LinkedHashMap<Fact, Integer> facts = new LinkedHashMap<Fact, Integer>();
 
     public FactList() {
     }

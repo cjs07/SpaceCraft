@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class Fact {
-    public static HashMap<Integer, Fact> mixList = new HashMap<>();
-    public static LinkedHashMap<String, Fact> facts = new LinkedHashMap<>();
+    public static HashMap<Integer, Fact> mixList = new HashMap<Integer, Fact>();
+    public static LinkedHashMap<String, Fact> facts = new LinkedHashMap<String, Fact>();
     String tag;
     Fact[] components;
     int color;
@@ -51,7 +51,7 @@ public class Fact {
     }
 
     public static ArrayList<Fact> getBasicFacts() {
-        ArrayList<Fact> basics = new ArrayList<>();
+        ArrayList<Fact> basics = new ArrayList<Fact>();
         Collection<Fact> pa = facts.values();
         for (Fact fragment : pa) {
             if (fragment.isBasic()) {
@@ -62,7 +62,7 @@ public class Fact {
     }
 
     public static ArrayList<Fact> getTheorizedFacts() {
-        ArrayList<Fact> theorized = new ArrayList<>();
+        ArrayList<Fact> theorized = new ArrayList<Fact>();
         Collection<Fact> pa = facts.values();
         for (Fact fragment : pa) {
             if (!fragment.isBasic()) {

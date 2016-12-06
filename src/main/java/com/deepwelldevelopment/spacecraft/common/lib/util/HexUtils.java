@@ -48,7 +48,7 @@ public class HexUtils {
     }
 
     public static HashMap<String, Hex> generateHexes(int radius) {
-        HashMap<String, Hex> results = new HashMap<>();
+        HashMap<String, Hex> results = new HashMap<String, Hex>();
         Hex h = new Hex(0, 0);
         results.put(h.toString(), h);
         for (int k = 0; k < radius; k++) {
@@ -64,7 +64,7 @@ public class HexUtils {
         return results;
     }
 
-    public ArrayList<Hex> distributeRingRandomly(int radius, int entries, Random random) {
+    public static ArrayList<Hex> distributeRingRandomly(int radius, int entries, Random random) {
         ArrayList<Hex> ring = HexUtils.getRing(radius);
         ArrayList<Hex> results = new ArrayList<Hex>();
         float spacing = (float) ring.size() / (float) entries;

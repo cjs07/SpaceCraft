@@ -1,15 +1,21 @@
 package com.deepwelldevelopment.spacecraft.common.lib.research;
 
 import com.deepwelldevelopment.spacecraft.api.facts.Fact;
+import com.deepwelldevelopment.spacecraft.api.facts.FactList;
+import com.deepwelldevelopment.spacecraft.api.research.ResearchCatergory;
+import com.deepwelldevelopment.spacecraft.api.research.ResearchItem;
 import com.deepwelldevelopment.spacecraft.common.item.SpaceCraftItems;
 import com.deepwelldevelopment.spacecraft.common.lib.util.HexUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ResearchManager {
 
@@ -133,15 +139,121 @@ public class ResearchManager {
         }
     }
 
-
     //placeholder
-    public static ItemStack createNote(ItemStack note, String key, World world) {
-        return null;
+    public static ItemStack createNote(ItemStack stack, String key, World world) {
+        ResearchItem rr = ResearchCatergory.getResearch(key);
+        Fact primaryFact = rr.getResearchPrimaryTag();
+        FactList facts = new FactList();
+        if (primaryFact == null) {
+            return null;
+        }
+        if (stack.getTagCompound() == null) {
+            stack.setTagCompound(new NBTTagCompound());
+        }
+        stack.getTagCompound().setString("key", key);
+        stack.getTagCompound().setInteger("color", primaryFact.getColor());
+        stack.getTagCompound().setBoolean("complete", false);
+        stack.getTagCompound().setInteger("copies", 0);
+        int radius = 1 + Math.min(3, rr.getComplexity());
+        HashMap<String, HexUtils.Hex> hexLocs = HexUtils.generateHexes(radius);
+        ArrayList<HexUtils.Hex> outerRing = HexUtils.distributeRingRandomly(radius, rr.tags.size(), world.rand);
+        HashMap<String, HexEntry> hexEntries = new HashMap<String, HexEntry>();
+        HashMap<String, HexUtils.Hex> hexes = new HashMap<String, HexUtils.Hex>();
+        for (HexUtils.Hex hex : hexLocs.values()) {
+            hexes.put(hex.toString(), hex);
+            hexEntries.put(hex.toString(), new HexEntry(null, 0));
+        }
+        int count = 0;
+        for (HexUtils.Hex hex : outerRing) {
+            hexes.put(hex.toString(), hex);
+            hexEntries.put(hex.toString(), new HexEntry(rr.tags.getFacts()[count], 1));
+            count++;
+        }
+        for (Fact fact : Fact.getBasicFacts()) {
+            facts.add(fact, rr.tags.size() + radius + world.rand.nextInt(radius));
+        }
+        facts.writeToNBT(stack.getTagCompound(), "facts");
+        if (rr.getComplexity() > 1) {
+            int blanks = rr.getComplexity() * 2;
+            HexUtils.Hex[] temp = hexes.values().toArray(new HexUtils.Hex[0]);
+            while (blanks > 0) {
+                int index = world.rand.nextInt(temp.length);
+                if (hexEntries.get(temp[index].toString()) == null || hexEntries.get(temp[index].toString()).type != 0) {
+                    continue;
+                }
+                boolean gtg = true;
+                for (int i = 0; i < 6; i++) {
+                    HexUtils.Hex neighbor = temp[index].getNeighbor(i);
+                    if (!hexes.containsKey(neighbor.toString()) || hexEntries.get(neighbor.toString()).type != 1) {
+                        continue;
+                    }
+                    int cc = 0;
+                    for (int j = 0; j < 6; j++) {
+                        if (hexes.containsKey(hexes.get(neighbor.toString()).getNeighbor(j).toString())) {
+                            cc++;
+                        }
+                        if (cc >= 2) {
+                            break;
+                        }
+                    }
+                    if (cc >= 2) {
+                        continue;
+                    }
+                    gtg = false;
+                    break;
+                }
+                if (!gtg) {
+                    continue;
+                }
+                hexes.remove(temp[index].toString());
+                hexEntries.remove(temp[index].toString());
+                temp = hexes.values().toArray(new HexUtils.Hex[0]);
+                blanks--;
+            }
+        }
+        NBTTagList gridTag = new NBTTagList();
+        for (HexUtils.Hex hex : hexes.values()) {
+            NBTTagCompound compound = new NBTTagCompound();
+            compound.setByte("hexq", (byte) hex.q);
+            compound.setByte("hexr", (byte) hex.r);
+            compound.setByte("type", (byte) hexEntries.get(hex.toString()).type);
+            if (hexEntries.get(hex.toString()).fact != null) {
+                compound.setString("fact", hexEntries.get(hex.toString()).fact.getTag());
+            }
+            gridTag.appendTag(compound);
+        }
+        stack.getTagCompound().setTag("hexgrid", gridTag);
+        return stack;
     }
 
     //placeholder for error mapping
     public static ResearchNoteData getData(ItemStack stack) {
-        return null;
+        if (stack == null) {
+            return null;
+        }
+        ResearchNoteData data = new ResearchNoteData();
+        if (stack.getTagCompound() == null) {
+            return null;
+        }
+        data.key = stack.getTagCompound().getString("key");
+        data.color = stack.getTagCompound().getInteger("color");
+        data.complete = stack.getTagCompound().getBoolean("complete");
+        data.copies = stack.getTagCompound().getInteger("copies");
+        data.facts.readfromNBT(stack.getTagCompound(), "facts");
+        NBTTagList grid = stack.getTagCompound().getTagList("hexgrid", 10);
+        data.hexEntries = new HashMap<String, HexEntry>();
+        for (int i = 0; i < grid.tagCount(); i++) {
+            NBTTagCompound compound = grid.getCompoundTagAt(i);
+            byte q = compound.getByte("hexq");
+            byte r = compound.getByte("hexr");
+            byte type = compound.getByte("type");
+            String tag = compound.getString("fact");
+            Fact fact = tag != null ? Fact.getFact(tag) : null;
+            HexUtils.Hex hex = new HexUtils.Hex(q, r);
+            data.hexEntries.put(hex.toString(), new HexEntry(fact, type));
+            data.hexes.put(hex.toString(), hex);
+        }
+        return data;
     }
 
     //placeholder
@@ -150,10 +262,11 @@ public class ResearchManager {
 
     public static class HexEntry {
 
-        public int type;
         public Fact fact;
+        public int type;
 
-        public HexEntry(int type) {
+        public HexEntry(Fact fact, int type) {
+            this.fact = fact;
             this.type = type;
         }
     }

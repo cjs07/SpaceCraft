@@ -16,14 +16,14 @@ public class ResearchCategoryList {
     public String researchKey;
     public Map<String, ResearchItem> research = new HashMap<String, ResearchItem>();
 
-    public ResearchCategoryList(ResourceLocation icon, ResourceLocation background, String researchKey) {
+    public ResearchCategoryList(String researchKey, ResourceLocation icon, ResourceLocation background) {
         this.icon = icon;
         this.background = background;
         this.background2 = null;
         this.researchKey = researchKey;
     }
 
-    public ResearchCategoryList(ResourceLocation icon, ResourceLocation background, ResourceLocation background2, String researchKey) {
+    public ResearchCategoryList(String researchKey, ResourceLocation icon, ResourceLocation background, ResourceLocation background2) {
         this.icon = icon;
         this.background = background;
         this.background2 = background2;
