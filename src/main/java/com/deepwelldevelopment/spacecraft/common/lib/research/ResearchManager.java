@@ -257,7 +257,27 @@ public class ResearchManager {
     }
 
     //placeholder
-    public static void updateData(ItemStack stack, ResearchNoteData note) {
+    public static void updateData(ItemStack stack, ResearchNoteData data) {
+        if (stack.getTagCompound() == null) {
+            stack.setTagCompound(new NBTTagCompound());
+        }
+        stack.getTagCompound().setString("key", data.key);
+        stack.getTagCompound().setInteger("color", data.color);
+        stack.getTagCompound().setBoolean("complete", data.complete);
+        stack.getTagCompound().setInteger("copies", data.copies);
+        data.facts.writeToNBT(stack.getTagCompound(), "facts");
+        NBTTagList gridTag = new NBTTagList();
+        for (HexUtils.Hex hex : data.hexes.values()) {
+            NBTTagCompound compound = new NBTTagCompound();
+            compound.setByte("hexq", (byte) hex.q);
+            compound.setByte("hexr", (byte) hex.r);
+            compound.setByte("type", (byte) data.hexEntries.get(hex.toString()).type);
+            if (data.hexEntries.get(hex.toString()).fact != null) {
+                compound.setString("fact", data.hexEntries.get(hex.toString()).fact.getTag());
+            }
+            gridTag.appendTag(compound);
+        }
+        stack.getTagCompound().setTag("hexgrid", gridTag);
     }
 
     public static class HexEntry {
