@@ -4,8 +4,10 @@ import com.deepwelldevelopment.spacecraft.api.facts.Fact;
 import com.deepwelldevelopment.spacecraft.api.facts.FactList;
 import com.deepwelldevelopment.spacecraft.api.research.ResearchCatergory;
 import com.deepwelldevelopment.spacecraft.api.research.ResearchItem;
+import com.deepwelldevelopment.spacecraft.common.SpaceCraft;
 import com.deepwelldevelopment.spacecraft.common.item.SpaceCraftItems;
 import com.deepwelldevelopment.spacecraft.common.lib.util.HexUtils;
+import com.deepwelldevelopment.spacecraft.common.lib.util.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemDye;
@@ -13,8 +15,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.IPlayerFileData;
+import net.minecraft.world.storage.SaveHandler;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.server.FMLServerHandler;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class ResearchManager {
@@ -278,6 +286,140 @@ public class ResearchManager {
             gridTag.appendTag(compound);
         }
         stack.getTagCompound().setTag("hexgrid", gridTag);
+    }
+
+    public static ArrayList<String> getResearchForPlayer(String player) {
+        ArrayList<String> out = SpaceCraft.proxy.getCompletedResearch().get(player);
+        try {
+            if (!loadingBlocked && out == null && SpaceCraft.proxy.getClientWorld() == null && FMLServerHandler.instance().getServer().worldServerForDimension(0) != null) {
+                SpaceCraft.proxy.getCompletedResearch().put(player, new ArrayList<String>());
+                if (player != null) {
+                    IPlayerFileData playerNBTManager = FMLServerHandler.instance().getServer().worldServerForDimension(0).getSaveHandler().getPlayerNBTManager();
+                    SaveHandler sh = (SaveHandler) playerNBTManager;
+                    File dir = ObfuscationReflectionHelper.getPrivateValue(SaveHandler.class, sh, "playersDirectory", "field_75771_c", "c");
+                    File file1 = new File(dir, "_" + player + ".scres");
+                    File file2 = new File(dir, "_" + player + ".scresbak");
+                    ResearchManager.loadPlayerData(player, file1, file2);
+                }
+                out = SpaceCraft.proxy.getCompletedResearch().get(player);
+            }
+        } catch (Exception e) {
+            //empty catch block
+        }
+        if (out == null) {
+            out = new ArrayList<String>();
+        }
+        return out;
+    }
+
+    public static ArrayList<String> getResearchForPlayerSafe(String player) {
+        return SpaceCraft.proxy.getCompletedResearch().get(player);
+    }
+
+    public static boolean doesPlayerHaveRequisites(String player, String key) {
+        ResearchItem ri = ResearchCatergory.getResearch(key);
+        if (ri == null) {
+            return true;
+        }
+        boolean out = true;
+        String[] parents = ri.parents;
+        ArrayList<String> completed = ResearchManager.getResearchForPlayer(player);
+        if (parents != null && parents.length > 0) {
+            out = false;
+            if (completed != null && completed.size() > 0) {
+                out = true;
+                for (String s : parents) {
+                    if (completed.contains(s)) {
+                        continue;
+                    }
+                    return false;
+                }
+            }
+        }
+        if ((parents = ri.parentsHidden) != null && parents.length > 0) {
+            if (parents != null && parents.length > 0) {
+                out = false;
+                for (String s : parents) {
+                    if (completed.contains(s)) {
+                        continue;
+                    }
+                    return false;
+                }
+            }
+        }
+        return out;
+    }
+
+    public static HashMap<String, Byte> getResearchFlagsForPlayer(String player) {
+        if (!SpaceCraft.proxy.getCompletedResearchFlags().containsKey(player)) {
+            SpaceCraft.proxy.getCompletedResearchFlags().put(player, new HashMap<String, Byte>());
+        }
+        return SpaceCraft.proxy.getCompletedResearchFlags().get(player);
+    }
+
+    public static Fact getCombinationresult(Fact fact1, Fact fact2) {
+        Collection<Fact> facts = Fact.facts.values();
+        for (Fact fact : facts) {
+            if (fact.getComponents() == null || (fact.getComponents()[0] != fact1 || fact.getComponents()[1] != fact2) && (fact.getComponents()[0] != fact2 || fact.getComponents()[1] != fact1)) {
+                continue;
+            }
+            return fact;
+        }
+        return null;
+    }
+
+    public static void setResearchFlag(String player, String key, byte flags) {
+        ResearchManager.getResearchFlagsForPlayer(player).put(key, flags);
+    }
+
+    public static boolean hasNewResearchFlags(String player, String key) {
+        if (ResearchManager.getResearchFlagsForPlayer(player).containsKey(key)) {
+            return Utils.getBit(ResearchManager.getResearchFlagsForPlayer(player).get(key), 1);
+        }
+        return false;
+    }
+
+    public static boolean hasNewPageFlag(String player, String key) {
+        if (ResearchManager.getResearchFlagsForPlayer(player).containsKey(key)) {
+            return Utils.getBit(ResearchManager.getResearchFlagsForPlayer(player).get(key), 2);
+        }
+        return false;
+    }
+
+    public static void setNewPageFlag(String player, String key) {
+
+    }
+
+    public static void clearNewPageFlag(String player, String key) {
+
+    }
+
+    public static void setNewResearchFlag(String player, String key) {
+
+    }
+
+    public static void clearNewResearchFlag(String player, String key) {
+
+    }
+
+    public static boolean completeResearchUnsaved(String player, String key) {
+        return false;
+    }
+
+    public static boolean completeResearch(String player, String key) {
+        return false;
+    }
+
+    public static void loadPlayerData(String player, File file1, File file2) {
+
+    }
+
+    public static boolean savePlayerData(String player, File file1, File file2) {
+        return false;
+    }
+
+    public static void saveResearchNBT(NBTTagCompound compound, EntityPlayer player) {
+
     }
 
     public static class HexEntry {
