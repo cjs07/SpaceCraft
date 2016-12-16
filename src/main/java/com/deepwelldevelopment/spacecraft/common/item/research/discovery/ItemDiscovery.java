@@ -13,12 +13,19 @@ public class ItemDiscovery extends Item {
 
     protected String name;
 
-    public ItemDiscovery(String name) {
+    String tag;
+
+    public ItemDiscovery(String name, String tag) {
         this.name = name;
+        this.tag = tag;
 
         setUnlocalizedName(name);
         setRegistryName(name);
         setCreativeTab(SpaceCraft.spaceCraftTab);
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     @Override

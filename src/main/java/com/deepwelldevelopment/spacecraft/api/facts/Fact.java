@@ -18,6 +18,8 @@ public class Fact {
     int blend;
     private String chatColor;
 
+    public static final Fact UNBREAKABLE_STONE = new Fact("unbreakablestone",  16777086, "e",  1);
+
     public Fact(String tag, int color, Fact[] components, ResourceLocation image, int blend) {
         if (facts.containsKey(tag)) {
             throw new IllegalArgumentException(tag + " already registered");

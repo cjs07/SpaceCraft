@@ -2,16 +2,19 @@ package com.deepwelldevelopment.spacecraft.common.lib.research;
 
 import com.deepwelldevelopment.spacecraft.api.facts.Fact;
 import com.deepwelldevelopment.spacecraft.api.facts.FactList;
+import com.deepwelldevelopment.spacecraft.api.research.ResearchCategoryList;
 import com.deepwelldevelopment.spacecraft.api.research.ResearchCatergory;
 import com.deepwelldevelopment.spacecraft.api.research.ResearchItem;
 import com.deepwelldevelopment.spacecraft.common.SpaceCraft;
 import com.deepwelldevelopment.spacecraft.common.item.SpaceCraftItems;
 import com.deepwelldevelopment.spacecraft.common.lib.util.HexUtils;
 import com.deepwelldevelopment.spacecraft.common.lib.util.Utils;
+import com.google.common.io.Files;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -21,12 +24,15 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
 public class ResearchManager {
 
+    static ArrayList<ResearchItem> allValidResearch = null;
     private static final String RESEARCH_TAG = "SPACECRAFT.RESEARCH";
     public static boolean loadingBlocked = false;
 
@@ -48,13 +54,41 @@ public class ResearchManager {
         return note;
     }
 
+    public static String findMatchingResearch(EntityPlayer player, Fact fact) {
+        String randomMatch = null;
+        if (allValidResearch == null) {
+            allValidResearch = new ArrayList<ResearchItem>();
+            Collection<ResearchCategoryList> rc = ResearchCatergory.researchCategories.values();
+            for (ResearchCategoryList cat : rc) {
+                Collection<ResearchItem> rl = cat.research.values();
+                for (ResearchItem ri : rl) {
+                    if (ri.isSecondary() || ri.isHidden() || ri.isVirtual() || ri.isStub()) {
+                        continue;
+                    }
+                    allValidResearch.add(ri);
+                }
+            }
+        }
+        ArrayList<String> keys = new ArrayList<String>();
+        for (ResearchItem research : allValidResearch) {
+            if (ResearchManager.isResearchComplete(player.getName(), research.key) || !ResearchManager.doesPlayerHaveRequisites(player.getName(), research.key) || research.tags.getAmount(fact) <= 0) {
+                continue;
+            }
+            keys.add(research.key);
+        }
+        if (keys.size() > 0) {
+            randomMatch = keys.get(player.worldObj.rand.nextInt(keys.size()));
+        }
+        return randomMatch;
+    }
+
     public static int getResearchSlot(EntityPlayer player, String key) {
         ItemStack[] inv = player.inventory.mainInventory;
         if (inv == null || inv.length == 0) {
             return -1;
         }
         for (int i = 0; i < inv.length; i++) {
-            if (inv[i] == null || inv[i].getItem() == null || inv[i].getItem() != SpaceCraftItems.researchNotes || ResearchManager.getData(inv[i]) == null /*|| !ResearchManager.getData((ItemStack)inv[i]).key.equals(key)*/) {
+            if (inv[i] == null || inv[i].getItem() == null || inv[i].getItem() != SpaceCraftItems.researchNotes || ResearchManager.getData(inv[i]) == null || !ResearchManager.getData((ItemStack)inv[i]).key.equals(key)) {
                 continue;
             }
             return i;
@@ -234,7 +268,6 @@ public class ResearchManager {
         return stack;
     }
 
-    //placeholder for error mapping
     public static ResearchNoteData getData(ItemStack stack) {
         if (stack == null) {
             return null;
@@ -286,6 +319,14 @@ public class ResearchManager {
             gridTag.appendTag(compound);
         }
         stack.getTagCompound().setTag("hexgrid", gridTag);
+    }
+
+    public static boolean isResearchComplete(String player, String key) {
+        ArrayList<String> completed = ResearchManager.getResearchForPlayer(player);
+        if (completed != null && completed.size() > 0) {
+            return completed.contains(key);
+        }
+        return false;
     }
 
     public static ArrayList<String> getResearchForPlayer(String player) {
@@ -387,39 +428,136 @@ public class ResearchManager {
     }
 
     public static void setNewPageFlag(String player, String key) {
-
+        if (!ResearchManager.getResearchFlagsForPlayer(player).containsKey(key)) {
+            SpaceCraft.proxy.getCompletedResearchFlags().put(player, new HashMap<String, Byte>());
+        }
+        if (ResearchManager.getResearchFlagsForPlayer(player).get(key) == null) {
+            ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) 0);
+        }
+        ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) Utils.setBit(ResearchManager.getResearchFlagsForPlayer(player).get(key), 2));
     }
 
     public static void clearNewPageFlag(String player, String key) {
-
+        if (!ResearchManager.getResearchFlagsForPlayer(player).containsKey(key)) {
+            SpaceCraft.proxy.getCompletedResearchFlags().put(player, new HashMap<String, Byte>());
+        }
+        if (ResearchManager.getResearchFlagsForPlayer(player).get(key) == null) {
+            ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) 0);
+        }
+        ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) Utils.clearBit(ResearchManager.getResearchFlagsForPlayer(player).get(key), 2));
     }
 
     public static void setNewResearchFlag(String player, String key) {
-
+        if (!ResearchManager.getResearchFlagsForPlayer(player).containsKey(key)) {
+            SpaceCraft.proxy.getCompletedResearchFlags().put(player, new HashMap<String, Byte>());
+        }
+        if (ResearchManager.getResearchFlagsForPlayer(player).get(key) == null) {
+            ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) 0);
+        }
+        ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) Utils.setBit(ResearchManager.getResearchFlagsForPlayer(player).get(key), 1));
     }
 
     public static void clearNewResearchFlag(String player, String key) {
-
+        if (!ResearchManager.getResearchFlagsForPlayer(player).containsKey(key)) {
+            SpaceCraft.proxy.getCompletedResearchFlags().put(player, new HashMap<String, Byte>());
+        }
+        if (ResearchManager.getResearchFlagsForPlayer(player).get(key) == null) {
+            ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) 0);
+        }
+        ResearchManager.getResearchFlagsForPlayer(player).put(key, (byte) Utils.clearBit(ResearchManager.getResearchFlagsForPlayer(player).get(key), 1));
     }
 
-    public static boolean completeResearchUnsaved(String player, String key) {
+    public static boolean completeResearchUnsaved(String player, String key, byte flags) {
         return false;
     }
 
-    public static boolean completeResearch(String player, String key) {
+    public static boolean completeResearch(String player, String key, byte flags) {
         return false;
     }
 
     public static void loadPlayerData(String player, File file1, File file2) {
-
+        try {
+            FileInputStream fileInputStream;
+            NBTTagCompound compound = null;
+            if (file1 != null && file1.exists()) {
+                try {
+                    fileInputStream = new FileInputStream(file1);
+                    compound = CompressedStreamTools.readCompressed(fileInputStream);
+                    fileInputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (file1 == null || !file1.exists() || compound == null || compound.hasNoTags()) {
+                //TODO: LOG THIS: PLAYER DATA NOT FOUND, TRYING TO LOADING BACKUP DATA
+                if (file2 != null && file2.exists()) {
+                    try {
+                        fileInputStream = new FileInputStream(file2);
+                        compound = CompressedStreamTools.readCompressed(fileInputStream);
+                        fileInputStream.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if (compound != null) {
+                ResearchManager.loadResearchNBT(compound, player);
+            }
+        } catch (Exception e) {
+          e.printStackTrace();
+          //TODO: LOG FATAL ERROR: FAILED TO LOAD RESEARCH DATA
+        }
     }
 
-    public static boolean savePlayerData(String player, File file1, File file2) {
-        return false;
+    public static boolean savePlayerData(EntityPlayer player, File file1, File file2) {
+        boolean success = true;
+        try {
+            NBTTagCompound compound = new NBTTagCompound();
+            ResearchManager.saveResearchNBT(compound, player);
+            if (file1 != null && file1.exists()) {
+                try {
+                    Files.copy(file1, file2);
+                } catch (Exception e) {
+                    //TODO: LOG NONFATAL ERROR: FAILED TO BACKUP DATA
+                }
+            }
+            try {
+                if (file1 != null) {
+                    FileOutputStream fileOutputStream = new FileOutputStream(file1);
+                    CompressedStreamTools.writeCompressed(compound, fileOutputStream);
+                    fileOutputStream.close();
+                }
+            } catch (Exception e) {
+                //TODO: LOG NONFATAL ERROR: FALIED TO SAVE RESEARCH DATA
+                if (file1.exists()) {
+                    try {
+                        file1.delete();
+                    }
+                    catch (Exception e2) {
+                        // empty catch block
+                    }
+                }
+                success = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //TODO: LOG FATAL ERROR: FAILED TO SAVE RESEARCH DATA
+            success = false;
+        }
+        return success;
+    }
+
+    public static void loadResearchNBT(NBTTagCompound compund, String player) {
+        NBTTagList tagList = compund.getTagList(RESEARCH_TAG, 10);
+        for (int i = 0; i < tagList.tagCount(); i++) {
+            NBTTagCompound rs = tagList.getCompoundTagAt(i);
+            if (rs.hasKey("key")) {
+                ResearchManager.completeResearchUnsaved(player, rs.getString("key"), rs.getByte("flags"));
+            }
+        }
     }
 
     public static void saveResearchNBT(NBTTagCompound compound, EntityPlayer player) {
-
     }
 
     public static class HexEntry {

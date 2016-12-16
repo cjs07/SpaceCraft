@@ -1,5 +1,6 @@
 package com.deepwelldevelopment.spacecraft.common.lib.crafting;
 
+import com.deepwelldevelopment.spacecraft.api.research.ResearchHelper;
 import com.deepwelldevelopment.spacecraft.common.item.research.discovery.ItemDiscovery;
 import com.google.common.base.Throwables;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,9 +25,11 @@ public class ResearchRecipeShaped extends ShapedRecipes implements ResearchCraft
     public boolean matches(InventoryCrafting inv, World worldIn) {
         EntityPlayer player = findPlayer(inv);
         if (player != null) {
-            return false;
+            if (ResearchHelper.isResearchComplete(player.getName(), requiredResearch.getTag())) {
+                return super.matches(inv, worldIn);
+            }
         }
-        return true;
+        return false;
     }
 
     @Override
