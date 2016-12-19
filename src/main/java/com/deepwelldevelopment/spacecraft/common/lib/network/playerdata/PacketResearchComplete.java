@@ -1,5 +1,6 @@
 package com.deepwelldevelopment.spacecraft.common.lib.network.playerdata;
 
+import com.deepwelldevelopment.spacecraft.common.SpaceCraft;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -13,9 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PacketResearchComplete implements IMessage, IMessageHandler<PacketResearchComplete, IMessage> {
 
-    private String key;
-    byte flags;
     private static ConcurrentHashMap<String, Long> spam = new ConcurrentHashMap<String, Long>();
+    byte flags;
+    private String key;
 
     public PacketResearchComplete() {
     }
@@ -51,6 +52,9 @@ public class PacketResearchComplete implements IMessage, IMessageHandler<PacketR
 
     @SideOnly(Side.CLIENT)
     void processMessage(PacketResearchComplete message) {
-
+        if (message.key != null && message.key.length() > 0) {
+            SpaceCraft.proxy.getResearchManager().completeResearch(Minecraft.getMinecraft().thePlayer, message.key, message.flags);
+            
+        }
     }
 }

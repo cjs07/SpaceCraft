@@ -32,9 +32,9 @@ import java.util.HashMap;
 
 public class ResearchManager {
 
-    static ArrayList<ResearchItem> allValidResearch = null;
     private static final String RESEARCH_TAG = "SPACECRAFT.RESEARCH";
     public static boolean loadingBlocked = false;
+    static ArrayList<ResearchItem> allValidResearch = null;
 
     public static ItemStack createResearchNoteForPlayer(World world, EntityPlayer player, String key) {
         ItemStack note = null;
@@ -88,7 +88,7 @@ public class ResearchManager {
             return -1;
         }
         for (int i = 0; i < inv.length; i++) {
-            if (inv[i] == null || inv[i].getItem() == null || inv[i].getItem() != SpaceCraftItems.researchNotes || ResearchManager.getData(inv[i]) == null || !ResearchManager.getData((ItemStack)inv[i]).key.equals(key)) {
+            if (inv[i] == null || inv[i].getItem() == null || inv[i].getItem() != SpaceCraftItems.researchNotes || ResearchManager.getData(inv[i]) == null || !ResearchManager.getData(inv[i]).key.equals(key)) {
                 continue;
             }
             return i;
@@ -468,10 +468,14 @@ public class ResearchManager {
     }
 
     public static boolean completeResearchUnsaved(String player, String key, byte flags) {
-        return false;
-    }
-
-    public static boolean completeResearch(String player, String key, byte flags) {
+        if (!ResearchManager.getResearchForPlayer(player).contains(key)) {
+            if (SpaceCraft.proxy.getCompletedResearch().get(player) == null) {
+                SpaceCraft.proxy.getCompletedResearch().put(player, new ArrayList<String>());
+            }
+            SpaceCraft.proxy.getCompletedResearch().get(player).add(key);
+            ResearchManager.setResearchFlag(player, key, flags);
+            return true;
+        }
         return false;
     }
 
@@ -558,6 +562,10 @@ public class ResearchManager {
     }
 
     public static void saveResearchNBT(NBTTagCompound compound, EntityPlayer player) {
+    }
+
+    public void completeResearch(EntityPlayer player, String key, byte flags) {
+        ResearchManager.completeResearchUnsaved(player.getName(), key, flags);
     }
 
     public static class HexEntry {
